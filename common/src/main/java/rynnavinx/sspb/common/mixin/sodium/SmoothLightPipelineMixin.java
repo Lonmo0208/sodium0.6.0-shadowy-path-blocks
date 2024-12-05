@@ -127,22 +127,27 @@ public abstract class SmoothLightPipelineMixin {
 		}
 	}
 
-
-	// Ideally the following two mixins would be done by modifying depth directly on applyParallelFace and applyNonParallelFace,
-	// but the package private AoNeighborInfo in the method signature prevents me from doing that
-	@ModifyVariable(method = "applyInsetPartialFaceVertex", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos){
+	@Unique
+	private float sspb$getModifiedAOWeight(float originalWeight, BlockPos pos){
 		BlockState blockState = lightCache.getLevel().getBlockState(pos);
 		boolean onlyAffectPathBlocks = SSPBClientMod.options().onlyAffectPathBlocks;
 
 		if((!onlyAffectPathBlocks && sspb$propagatesSkylightDown(blockState, lightCache.getLevel(), pos)) ||
 				(onlyAffectPathBlocks && blockState.getBlock() instanceof DirtPathBlock)){
 
-			// Mix between actual and full depth, to mix between fixed sodium lighting and bugged vanilla lighting, respectively
-			return (n1d * SSPBClientMod.options().getShadowynessCompliment()) + SSPBClientMod.options().getShadowyness();
+			// Mix between actual and full shadowyness, to mix between fixed sodium lighting and bugged vanilla lighting, respectively
+			return (originalWeight * SSPBClientMod.options().getShadowynessCompliment()) + SSPBClientMod.options().getShadowyness();
 		}
 
-		return n1d;
+		return originalWeight;
+	}
+
+
+	// Ideally the following two mixins would be done by modifying depth directly on applyParallelFace and applyNonParallelFace,
+	// but the package private AoNeighborInfo in the method signature prevents me from doing that
+	@ModifyVariable(method = "applyInsetPartialFaceVertex", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos){
+		return sspb$getModifiedAOWeight(n1d, pos);
 	}
 
 	@ModifyVariable(method = "applyInsetPartialFaceVertex", at = @At(value = "HEAD", shift = At.Shift.BY, by = 1), argsOnly = true, ordinal = 1)
@@ -151,13 +156,8 @@ public abstract class SmoothLightPipelineMixin {
 	}
 
 	@ModifyVariable(method = "gatherInsetFace", at = @At("STORE"), ordinal = 0)
-	private float modifyGatherInsetFaceW1(float w1, ModelQuadView quad, BlockPos blockPos, int vertexIndex, Direction lightFace, boolean shade){
-		if(SSPBClientMod.options().onlyAffectPathBlocks && !(lightCache.getLevel().getBlockState(blockPos).getBlock() instanceof DirtPathBlock)){
-			return w1;
-		}
-
-		// Same as in modifyApplyInsetPartialFaceVertexN1d
-		return (w1 * SSPBClientMod.options().getShadowynessCompliment()) + SSPBClientMod.options().getShadowyness();
+	private float modifyGatherInsetFaceW1(float w1, ModelQuadView quad, BlockPos blockPos){
+		return sspb$getModifiedAOWeight(w1, blockPos);
 	}
 
 	@Inject(method = "calculate", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lnet/caffeinemc/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lnet/caffeinemc/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lnet/caffeinemc/mods/sodium/client/model/light/data/QuadLightData;Z)V", shift = At.Shift.BEFORE), cancellable = true)
