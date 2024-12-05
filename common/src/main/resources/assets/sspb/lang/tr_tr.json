@@ -1,0 +1,9 @@
+{
+  "sspb.pages.sspb_page.name": "SSPB",
+  "sspb.options.shadowyness.name": "Gölgesellik",
+  "sspb.options.shadowyness.tooltip": "Tam olmayan bloklardaki vanilya benzeri gölgelerin yoğunluğunu ayarlar.\n\n0% - Yok (Sodium varsayılanı)\n85% - SSPB Varsayılanı\n100% - Maksimum (Vanilya yoğunluğu, ancak bazı durumlarda vanilyadan daha karanlık olabilir)\n\n\"Yol blokları için vanilya aydınlatmasını kullan\" seçeneği etkin olduğunda yol bloklarını etkilemez.",
+  "sspb.options.onlyaffectpathblocks.name": "Sadece yol bloklarını etkile",
+  "sspb.options.onlyaffectpathblocks.tooltip": "Vanilya Minecraft'ta gölgeli yol bloklarına neden olan hata, aslında sıvı olmayan ve tam olmayan tüm blokları etkiler.\n\nVarsayılan olarak, SSPB aynı zamanda sıvı olmayan ve tam olmayan tüm bloklara vanilya benzeri yumuşak aydınlatma uygular. Bu seçeneği etkinleştirmek, etkileri yalnızca yol bloklarıyla sınırlar.",
+  "sspb.options.vanillapathblocklighting.name": "Yol blokları için vanilya aydınlatmasını kullan",
+  "sspb.options.vanillapathblocklighting.tooltip": "Etkinleştirildiğinde, yol blokları için aydınlatma, Sodium'un aydınlatma algoritmasının değiştirilmiş bir versiyonu yerine vanilya doğruluğunda bir algoritmayla işlenir.\n\nBu seçenek, gölgesellik kaydırıcısının yol blokları üzerindeki etkisini devre dışı bırakır."
+}
