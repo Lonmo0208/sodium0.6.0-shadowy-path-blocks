@@ -2,13 +2,13 @@ package rynnavinx.sspb.common.client.gui;
 
 import com.google.common.collect.ImmutableList;
 
-import net.caffeinemc.mods.sodium.client.gui.options.OptionFlag;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionGroup;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionImpl;
-import net.caffeinemc.mods.sodium.client.gui.options.OptionPage;
-import net.caffeinemc.mods.sodium.client.gui.options.control.ControlValueFormatter;
-import net.caffeinemc.mods.sodium.client.gui.options.control.SliderControl;
-import net.caffeinemc.mods.sodium.client.gui.options.control.TickBoxControl;
+import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
+import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
+import me.jellysquid.mods.sodium.client.gui.options.OptionImpl;
+import me.jellysquid.mods.sodium.client.gui.options.OptionPage;
+import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
+import me.jellysquid.mods.sodium.client.gui.options.control.SliderControl;
+import me.jellysquid.mods.sodium.client.gui.options.control.TickBoxControl;
 
 import net.minecraft.network.chat.Component;
 

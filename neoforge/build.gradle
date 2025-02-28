@@ -2,6 +2,9 @@ plugins {
     id 'multiloader-loader'
     id 'net.neoforged.moddev'
 }
+repositories {
+    flatDir { dirs "libs" }
+}
 
 neoForge {
     version = neoforge_version
@@ -35,5 +38,6 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     //modCompileOnly "maven.modrinth:forgified-fabric-api:${fabric_version}"
 
-    implementation "maven.modrinth:sodium:${sodium_version}-neoforge"
+    //implementation "maven.modrinth:sodium:${sodium_version}-neoforge"
+    implementation "libs:Sodium-NeoForge:mc1.20.1-0.6.0-Fix"
 }

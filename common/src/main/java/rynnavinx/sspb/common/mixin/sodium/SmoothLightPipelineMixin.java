@@ -21,12 +21,12 @@
 
 package rynnavinx.sspb.common.mixin.sodium;
 
-import net.caffeinemc.mods.sodium.client.model.light.data.LightDataAccess;
-import net.caffeinemc.mods.sodium.client.model.light.data.QuadLightData;
-import net.caffeinemc.mods.sodium.client.model.light.smooth.SmoothLightPipeline;
-import net.caffeinemc.mods.sodium.client.model.quad.ModelQuadView;
-import net.caffeinemc.mods.sodium.client.render.frapi.mesh.EncodingFormat;
-import net.caffeinemc.mods.sodium.client.render.frapi.mesh.QuadViewImpl;
+import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
+import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
+import me.jellysquid.mods.sodium.client.model.light.smooth.SmoothLightPipeline;
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.render.frapi.mesh.EncodingFormat;
+import me.jellysquid.mods.sodium.client.render.frapi.mesh.QuadViewImpl;
 
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.core.BlockPos;
@@ -160,7 +160,7 @@ public abstract class SmoothLightPipelineMixin {
 		return sspb$getModifiedAOWeight(w1, blockPos);
 	}
 
-	@Inject(method = "calculate", at = @At(value = "INVOKE", target = "Lnet/caffeinemc/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lnet/caffeinemc/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lnet/caffeinemc/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lnet/caffeinemc/mods/sodium/client/model/light/data/QuadLightData;Z)V", shift = At.Shift.BEFORE), cancellable = true)
+	@Inject(method = "calculate", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lme/jellysquid/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;Z)V", shift = At.Shift.BEFORE), cancellable = true)
 	private void injectVanillaAoCalcForPathBlocks(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade, boolean isFluid, CallbackInfo ci){
 		if(SSPBClientMod.options().vanillaPathBlockLighting && lightCache.getLevel().getBlockState(pos).getBlock() instanceof DirtPathBlock){
 			sspb$calcVanilla((QuadViewImpl) quad, out.br, out.lm, pos, lightFace, shade);
