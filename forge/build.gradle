@@ -11,6 +11,18 @@ mixin {
 }
 
 minecraft {
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    runs {
+        client {
+        }
+    }
+}
+
+minecraft {
     mappings channel: 'parchment', version: "2023.09.03-1.20.1"
 
     copyIdeResources = true //Calls processResources when in dev
@@ -41,19 +53,21 @@ minecraft {
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 repositories {
-    flatDir{
-        dir "${rootProject.rootDir}/custom_sodium"
-    }
+    flatDir { dirs "libs" }
 }
 
 dependencies {
+    //implementation "maven.modrinth:forgified-fabric-api:${fabric_version}"
     minecraft "net.minecraftforge:forge:1.20.1-${forge_version}"
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 	
-	implementation fg.deobf("net.caffeinemc.mods:sodium:forge-0.6.0-alpha.3+mc1.20.1")
+	//implementation fg.deobf("net.caffeinemc.mods:sodium:forge-0.6.0-alpha.3+mc1.20.1")
+    implementation "libs:Sodium-NeoForge:mc1.20.1-0.6.0-Fix"
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 }
 
 publishing {
