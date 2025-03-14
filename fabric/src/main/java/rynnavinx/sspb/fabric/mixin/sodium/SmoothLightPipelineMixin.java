@@ -164,26 +164,9 @@ public abstract class SmoothLightPipelineMixin {
 		return sspb$getModifiedAOWeight(w1, blockPos);
 	}
 
-	@Inject(
-			method = "calculate",
-			at = @At(
-					value = "INVOKE",
-					target = "Lme/jellysquid/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lme/jellysquid/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;)V",
-					shift = At.Shift.BEFORE
-			),
-			cancellable = true
-	)
-	private void injectVanillaAoCalcForPathBlocks(
-			ModelQuadView quad,
-			BlockPos pos,
-			QuadLightData out,
-			Direction cullFace,
-			Direction lightFace,
-			boolean shade,
-			boolean isFluid,
-			CallbackInfo ci
-	) {
-		if (SSPBClientMod.options().vanillaPathBlockLighting && lightCache.getLevel().getBlockState(pos).getBlock() instanceof DirtPathBlock) {
+	@Inject(method = "calculate", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lme/jellysquid/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;)V", shift = At.Shift.BEFORE), cancellable = true)
+	private void injectVanillaAoCalcForPathBlocks(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade, boolean isFluid, CallbackInfo ci){
+		if(SSPBClientMod.options().vanillaPathBlockLighting && lightCache.getLevel().getBlockState(pos).getBlock() instanceof DirtPathBlock){
 			sspb$calcVanilla((QuadViewImpl) quad, out.br, out.lm, pos, lightFace, shade);
 			ci.cancel();
 		}

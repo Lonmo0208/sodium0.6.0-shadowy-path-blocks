@@ -1,0 +1,34 @@
+{
+  "mappings": {
+    "rynnavinx/sspb/common/mixin/minecraft/AmbientOcclusionFaceAccessor": {
+      "brightness": "f_111149_:[F",
+      "lightmap": "f_111150_:[I"
+    },
+    "rynnavinx/sspb/common/mixin/minecraft/ModelBlockRendererAccessor": {
+      "calculateShape": "m_111039_(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;[ILnet/minecraft/core/Direction;[FLjava/util/BitSet;)V"
+    },
+    "rynnavinx/sspb/forge/mixin/minecraft/AmbientOcclusionFaceMixin": {
+      "Lnet/minecraft/core/BlockPos$MutableBlockPos;setWithOffset(Lnet/minecraft/core/Vec3i;Lnet/minecraft/core/Direction;)Lnet/minecraft/core/BlockPos$MutableBlockPos;": "Lnet/minecraft/core/BlockPos$MutableBlockPos;m_122159_(Lnet/minecraft/core/Vec3i;Lnet/minecraft/core/Direction;)Lnet/minecraft/core/BlockPos$MutableBlockPos;",
+      "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$Cache;getShadeBrightness(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$Cache;m_111226_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)F",
+      "Lnet/minecraft/world/level/block/state/BlockState;isViewBlocking(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z": "Lnet/minecraft/world/level/block/state/BlockState;m_60831_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z",
+      "calculate": "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$AmbientOcclusionFace;m_111167_(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;[FLjava/util/BitSet;Z)V"
+    }
+  },
+  "data": {
+    "searge": {
+      "rynnavinx/sspb/common/mixin/minecraft/AmbientOcclusionFaceAccessor": {
+        "brightness": "f_111149_:[F",
+        "lightmap": "f_111150_:[I"
+      },
+      "rynnavinx/sspb/common/mixin/minecraft/ModelBlockRendererAccessor": {
+        "calculateShape": "m_111039_(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;[ILnet/minecraft/core/Direction;[FLjava/util/BitSet;)V"
+      },
+      "rynnavinx/sspb/forge/mixin/minecraft/AmbientOcclusionFaceMixin": {
+        "Lnet/minecraft/core/BlockPos$MutableBlockPos;setWithOffset(Lnet/minecraft/core/Vec3i;Lnet/minecraft/core/Direction;)Lnet/minecraft/core/BlockPos$MutableBlockPos;": "Lnet/minecraft/core/BlockPos$MutableBlockPos;m_122159_(Lnet/minecraft/core/Vec3i;Lnet/minecraft/core/Direction;)Lnet/minecraft/core/BlockPos$MutableBlockPos;",
+        "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$Cache;getShadeBrightness(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$Cache;m_111226_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)F",
+        "Lnet/minecraft/world/level/block/state/BlockState;isViewBlocking(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z": "Lnet/minecraft/world/level/block/state/BlockState;m_60831_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z",
+        "calculate": "Lnet/minecraft/client/renderer/block/ModelBlockRenderer$AmbientOcclusionFace;m_111167_(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;[FLjava/util/BitSet;Z)V"
+      }
+    }
+  }
+}
