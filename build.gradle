@@ -1,4 +1,5 @@
 plugins {
+    id("java")
     // see https://fabricmc.net/develop/ for new versions
     id 'fabric-loom' version '1.9.2' apply false
     // see https://projects.neoforged.net/neoforged/neogradle for new versions
