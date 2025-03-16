@@ -7,6 +7,7 @@ plugins {
 
 mixin {
     config("${mod_id}.mixins.json")
+    config("${mod_id}.forge.mixins.json")
     config("${mod_id}.forgeneoforge.mixins.json")
 }
 
@@ -41,6 +42,7 @@ minecraft {
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
 repositories {
+    flatDir { dirs "libs" }
     flatDir{
         dir "${rootProject.rootDir}/custom_sodium"
     }
@@ -52,8 +54,9 @@ dependencies {
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
-	
-	implementation fg.deobf("net.caffeinemc.mods:sodium:forge-0.6.0-alpha.3+mc1.20.1")
+	implementation fg.deobf("libs:Sodium-NeoForge:mc1.20.1-0.6.0-Fix")
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 }
 
 publishing {
