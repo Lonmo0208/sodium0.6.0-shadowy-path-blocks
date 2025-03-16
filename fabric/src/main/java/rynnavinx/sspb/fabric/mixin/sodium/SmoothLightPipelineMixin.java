@@ -55,6 +55,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.BitSet;
+import org.objectweb.asm.Opcodes;
 
 
 // Same as the version of this mixin in common, but remap is not set to false in the below annotation
@@ -132,7 +133,8 @@ public abstract class SmoothLightPipelineMixin {
 	}
 
 	@Unique
-	private float sspb$getModifiedAOWeight(float originalWeight, BlockPos pos){
+	private float sspb$getModifiedAOWeight(float originalWeight, BlockPos pos) {
+		if (pos == null) return originalWeight;
 		BlockState blockState = lightCache.getLevel().getBlockState(pos);
 		boolean onlyAffectPathBlocks = SSPBClientMod.options().onlyAffectPathBlocks;
 
@@ -149,26 +151,48 @@ public abstract class SmoothLightPipelineMixin {
 
 	// Ideally the following two mixins would be done by modifying depth directly on applyParallelFace and applyNonParallelFace,
 	// but the package private AoNeighborInfo in the method signature prevents me from doing that
-	@ModifyVariable(method = "applyInsetPartialFaceVertex", at = @At("HEAD"), argsOnly = true, ordinal = 0)
-	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos){
+	@ModifyVariable(
+			method = "applyInsetPartialFaceVertex",
+			at = @At("HEAD"),
+			argsOnly = true,
+			ordinal = 0
+	)
+	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos, Direction dir) {
 		return sspb$getModifiedAOWeight(n1d, pos);
 	}
 
-	@ModifyVariable(method = "applyInsetPartialFaceVertex", at = @At(value = "HEAD", shift = At.Shift.BY, by = 1), argsOnly = true, ordinal = 1)
-	private float modifyApplyInsetPartialFaceVertexN2d(float n2d, BlockPos pos, Direction dir, float n1d){
-		return 1.0f - n1d;
+	@ModifyVariable(
+			method = "gatherInsetFace",
+			at = @At(
+					value = "STORE",
+					opcode = Opcodes.FSTORE
+			),
+			ordinal = 0,
+			remap = false
+	)
+	private float modifyGatherInsetFaceDepth(
+			float depth,
+			BlockPos pos,
+			int vertexIdx,
+			Direction face,
+			boolean shade,
+			float x, float y, float z
+	) {
+		return sspb$getModifiedAOWeight(depth, pos);
 	}
 
-	@ModifyVariable(method = "gatherInsetFace", at = @At("STORE"), ordinal = 0)
-	private float modifyGatherInsetFaceW1(float w1, ModelQuadView quad, BlockPos blockPos){
-		return sspb$getModifiedAOWeight(w1, blockPos);
-	}
+	@Inject(method = "calculate", at = @At(value = "INVOKE",
+			target = "Lme/jellysquid/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lme/jellysquid/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;Z)V",
+			shift = At.Shift.BEFORE),
+			cancellable = true)
+	private void injectVanillaAoCalcForPathBlocks(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade, boolean isFluid, CallbackInfo ci) {
+		if (SSPBClientMod.options().vanillaPathBlockLighting
+				&& lightCache.getLevel().getBlockState(pos).getBlock() instanceof DirtPathBlock) {
 
-	@Inject(method = "calculate", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/model/light/smooth/SmoothLightPipeline;applyParallelFace(Lme/jellysquid/mods/sodium/client/model/light/smooth/AoNeighborInfo;Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadView;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;Lme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;)V", shift = At.Shift.BEFORE), cancellable = true)
-	private void injectVanillaAoCalcForPathBlocks(ModelQuadView quad, BlockPos pos, QuadLightData out, Direction cullFace, Direction lightFace, boolean shade, boolean isFluid, CallbackInfo ci){
-		if(SSPBClientMod.options().vanillaPathBlockLighting && lightCache.getLevel().getBlockState(pos).getBlock() instanceof DirtPathBlock){
-			sspb$calcVanilla((QuadViewImpl) quad, out.br, out.lm, pos, lightFace, shade);
-			ci.cancel();
+			if (quad instanceof QuadViewImpl) {
+				sspb$calcVanilla((QuadViewImpl) quad, out.br, out.lm, pos, lightFace, shade);
+				ci.cancel();
+			}
 		}
 	}
 
@@ -194,6 +218,7 @@ public abstract class SmoothLightPipelineMixin {
 
 	@Unique
 	private void sspb$calcVanilla(QuadViewImpl quad, float[] aoDest, int[] lightDest, BlockPos pos, Direction lightFace, boolean shade) {
+		if (quad == null || aoDest == null || lightDest == null) return;
 		sspb$vanillaAoControlBits.clear();
 		quad.toVanilla(sspb$vertexData, 0);
 
