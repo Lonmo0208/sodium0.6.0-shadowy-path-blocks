@@ -17,7 +17,6 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    //modImplementation "maven.modrinth:sodium:${sodium_version}-fabric"
     modImplementation "libs:Sodium-NeoForge:mc1.20.1-0.6.0-Fix"
 }
 
