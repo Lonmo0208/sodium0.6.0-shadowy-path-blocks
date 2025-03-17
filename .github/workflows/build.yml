@@ -12,7 +12,7 @@ jobs:
       matrix:
         # Use these Java versions
         java: [
-          21,    # Current Java LTS
+          17,    # Current Java LTS
         ]
         # and run on both Linux and Windows
         os: [ubuntu-22.04, windows-2022]
@@ -30,13 +30,22 @@ jobs:
       - name: make gradle wrapper executable
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
-      - name: build
-        run: ./gradlew build
+      - name: buildForge
+        run: ./gradlew Forge:build
       - name: capture build artifacts
-        if: ${{ runner.os == 'Linux' && matrix.java == '21' }} # Only upload artifacts built from latest java on one OS
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' }} # Only upload artifacts built from latest java on one OS
         uses: actions/upload-artifact@v4
         with:
           name: Artifacts
           path: |
-            neoforge/build/libs/*.jar
+            forge/build/libs/*.jar
+      - name: buildFabric
+        run: ./gradlew Fabric:build
+      - name: capture build artifacts
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' }} # Only upload artifacts built from latest java on one OS
+        uses: actions/upload-artifact@v4
+        with:
+          name: Artifacts
+          path: |
+            forge/build/libs/*.jar
             fabric/build/libs/*.jar
