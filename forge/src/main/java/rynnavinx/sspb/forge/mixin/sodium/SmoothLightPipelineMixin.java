@@ -25,12 +25,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import rynnavinx.sspb.common.client.SSPBClientMod;
 import rynnavinx.sspb.common.client.render.frapi.aocalc.VanillaAoHelper;
+import rynnavinx.sspb.common.client.util.MethodSignature;
 import rynnavinx.sspb.common.mixin.minecraft.AmbientOcclusionFaceAccessor;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.nio.FloatBuffer;
 import java.util.BitSet;
 
 @Mixin(SmoothLightPipeline.class)
@@ -46,12 +46,11 @@ public abstract class SmoothLightPipelineMixin {
 	static {
 		try {
 			MethodHandles.Lookup lookup = MethodHandles.lookup();
-			// Forge 1.20.1 MCP映射确认
-			Class<?>[] paramTypes = {BlockGetter.class, BlockPos.class};
+			// 正确的方法签名：1.20.1 Forge使用getBlockState()而不是直接传递BlockGetter
 			sspb$propagatesSkylightDownHandle = lookup.findVirtual(
 					BlockStateBase.class,
-					"m_60631_", // Mojang混淆名（1.20.1实际运行时名称）
-					MethodType.methodType(boolean.class, paramTypes)
+					"m_60631_",
+					MethodType.methodType(boolean.class, BlockGetter.class, BlockPos.class)
 			);
 		} catch (NoSuchMethodException | IllegalAccessException e) {
 			throw new RuntimeException("Failed to initialize propagatesSkylightDown method handle", e);
@@ -80,27 +79,12 @@ public abstract class SmoothLightPipelineMixin {
 				|| (onlyAffectPathBlocks && blockState.getBlock() instanceof DirtPathBlock);
 
 		if (shouldModify) {
-			// 确保shadowynessCompliment = 1 - shadowyness
 			float shadow = SSPBClientMod.options().getShadowyness();
-			float compliment = 1.0f - shadow; // 直接计算而非从配置获取
-
-			return Mth.clamp(
-					(originalWeight * compliment) + shadow,
-					0.0f,
-					1.0f
-			);
+			float compliment = SSPBClientMod.options().getShadowynessCompliment();
+			return Mth.clamp((originalWeight * compliment) + shadow, 0.0f, 1.0f);
 		}
 		return originalWeight;
 	}
-
-
-	@Unique
-	private static final FloatBuffer precomputedFactors = FloatBuffer.allocate(101);
-	static {
-		for (int i = 0; i <= 100; i++) {
-		}
-	}
-
 
 	@ModifyVariable(
 			method = "applyInsetPartialFaceVertex(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;FF[FILme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;Z)V",
@@ -110,19 +94,18 @@ public abstract class SmoothLightPipelineMixin {
 			remap = false
 	)
 	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos, Direction dir) {
-		return sspb$getModifiedAOWeight(n1d, pos); // 保持原有调用方式
+		return sspb$getModifiedAOWeight(n1d, pos);
 	}
-
 
 	@ModifyVariable(
 			method = "applyInsetPartialFaceVertex",
-			at = @At("HEAD"),
+			at = @At(value = "HEAD", shift = At.Shift.AFTER),
 			argsOnly = true,
 			ordinal = 1,
 			remap = false
 	)
-	private float modifyApplyInsetPartialFaceVertexN2d(float n2d, BlockPos pos, Direction dir) {
-		return 1.0f - sspb$getModifiedAOWeight(1.0f, pos);
+	private float modifyApplyInsetPartialFaceVertexN2d(float n2d, BlockPos pos, Direction dir, float n1d) {
+		return 1.0f - n1d; // 根据原始逻辑修正，n2d = 1 - n1d
 	}
 
 	@ModifyVariable(
