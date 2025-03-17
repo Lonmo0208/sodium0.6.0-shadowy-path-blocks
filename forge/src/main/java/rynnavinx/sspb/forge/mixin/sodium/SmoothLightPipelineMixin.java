@@ -1,24 +1,3 @@
-/*
- * This file contains modified parts of AoCalculator.java from
- * "Fabric Renderer - Indigo" from "Fabric API".
- *
- * Therefore, it incorporates work under the following license:
- *
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package rynnavinx.sspb.forge.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.model.light.data.LightDataAccess;
@@ -30,6 +9,7 @@ import me.jellysquid.mods.sodium.client.render.frapi.mesh.QuadViewImpl;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.DirtPathBlock;
@@ -50,6 +30,7 @@ import rynnavinx.sspb.common.mixin.minecraft.AmbientOcclusionFaceAccessor;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.FloatBuffer;
 import java.util.BitSet;
 
 @Mixin(SmoothLightPipeline.class)
@@ -65,12 +46,12 @@ public abstract class SmoothLightPipelineMixin {
 	static {
 		try {
 			MethodHandles.Lookup lookup = MethodHandles.lookup();
-			// Forge 1.20.1 实际映射检查
-			MethodType methodType = MethodType.methodType(boolean.class, BlockGetter.class, BlockPos.class);
+			// Forge 1.20.1 MCP映射确认
+			Class<?>[] paramTypes = {BlockGetter.class, BlockPos.class};
 			sspb$propagatesSkylightDownHandle = lookup.findVirtual(
-					BlockStateBase.class, // 注意：实际方法在BlockStateBase中
+					BlockStateBase.class,
 					"m_60631_", // Mojang混淆名（1.20.1实际运行时名称）
-					methodType
+					MethodType.methodType(boolean.class, paramTypes)
 			);
 		} catch (NoSuchMethodException | IllegalAccessException e) {
 			throw new RuntimeException("Failed to initialize propagatesSkylightDown method handle", e);
@@ -80,7 +61,6 @@ public abstract class SmoothLightPipelineMixin {
 	@Unique
 	private boolean sspb$propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
 		try {
-			// 通过BlockStateBase访问（实际实现层级）
 			return (boolean) sspb$propagatesSkylightDownHandle.invokeExact(
 					(BlockStateBase) state,
 					level,
@@ -91,20 +71,36 @@ public abstract class SmoothLightPipelineMixin {
 		}
 	}
 
-
 	@Unique
 	private float sspb$getModifiedAOWeight(float originalWeight, BlockPos pos) {
 		BlockState blockState = lightCache.getLevel().getBlockState(pos);
-		boolean shouldModify = blockState.getBlock() instanceof DirtPathBlock ||
-				sspb$propagatesSkylightDown(blockState, lightCache.getLevel(), pos);
+		boolean onlyAffectPathBlocks = SSPBClientMod.options().onlyAffectPathBlocks;
+
+		boolean shouldModify = (!onlyAffectPathBlocks && sspb$propagatesSkylightDown(blockState, lightCache.getLevel(), pos))
+				|| (onlyAffectPathBlocks && blockState.getBlock() instanceof DirtPathBlock);
 
 		if (shouldModify) {
-			float compliment = SSPBClientMod.options().getShadowynessCompliment();
+			// 确保shadowynessCompliment = 1 - shadowyness
 			float shadow = SSPBClientMod.options().getShadowyness();
-			return (originalWeight * compliment) + shadow;
+			float compliment = 1.0f - shadow; // 直接计算而非从配置获取
+
+			return Mth.clamp(
+					(originalWeight * compliment) + shadow,
+					0.0f,
+					1.0f
+			);
 		}
 		return originalWeight;
 	}
+
+
+	@Unique
+	private static final FloatBuffer precomputedFactors = FloatBuffer.allocate(101);
+	static {
+		for (int i = 0; i <= 100; i++) {
+		}
+	}
+
 
 	@ModifyVariable(
 			method = "applyInsetPartialFaceVertex(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;FF[FILme/jellysquid/mods/sodium/client/model/light/data/QuadLightData;Z)V",
@@ -114,7 +110,19 @@ public abstract class SmoothLightPipelineMixin {
 			remap = false
 	)
 	private float modifyApplyInsetPartialFaceVertexN1d(float n1d, BlockPos pos, Direction dir) {
-		return sspb$getModifiedAOWeight(n1d, pos);
+		return sspb$getModifiedAOWeight(n1d, pos); // 保持原有调用方式
+	}
+
+
+	@ModifyVariable(
+			method = "applyInsetPartialFaceVertex",
+			at = @At("HEAD"),
+			argsOnly = true,
+			ordinal = 1,
+			remap = false
+	)
+	private float modifyApplyInsetPartialFaceVertexN2d(float n2d, BlockPos pos, Direction dir) {
+		return 1.0f - sspb$getModifiedAOWeight(1.0f, pos);
 	}
 
 	@ModifyVariable(
